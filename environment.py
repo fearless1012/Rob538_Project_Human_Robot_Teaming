@@ -32,7 +32,7 @@ class World(object):
             G = comm_mat[i]
             self.Teams[i].updateZ(G, task_mat, self.n_tasks)
 
-    def generate_Z(self, task_mat):
+    def generate_B(self, task_mat):
         for i in range(self.n_teams):
             self.Teams[i].updateB(task_mat, self.n_tasks)
 
