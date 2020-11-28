@@ -39,14 +39,22 @@ class World(object):
     def updateWorkload(self):
         pass
 
+    def auction_phase(self):
+        pass
+
+    def consensus_phase(self):
+        pass
+
     def runSimulation(self, n_episodes):
         for i in range(n_episodes):
             # self.comm_mat = self.generate_COMM(n_teams) # uncomment for dynamic system
-            self.task_mat = np.random.randint(2, size=(n_teams, n_tasks))
+            self.task_mat = np.random.randint(2, size=(self.n_teams, self.n_tasks))
             self.generate_Z(self.comm_mat, self.task_mat)
             self.generate_B(self.task_mat)
             while self.consensus != True: # Subject to change; Update the termination condition for consensus termination
+                print('test')
                 # TODO: Phase 1 Auction
+
                 # TODO: Phase 2 Consensus
 
             # Get Task performance metrics and workload metrics
