@@ -48,6 +48,7 @@ class Team(object):
 		self.x_i = np.zeros(n_teams*n_tasks, dtype=int)
 		self.b_i = np.zeros(n_teams*n_tasks)
 		self.y_i = np.zeros(n_teams*n_tasks)
+		self.y_previous = np.zeros(n_teams*n_tasks)
 		self.j_i = 0
 
 	def updateZ(self, G, task_mat, n_tasks):

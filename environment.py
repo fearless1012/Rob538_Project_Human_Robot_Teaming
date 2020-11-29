@@ -47,20 +47,57 @@ class World(object):
                     team.y_i[j] = b
 
     def consensus_phase(self):
-        pass
+        for team in self.Teams:
+            #Get y from neighbors
+            row = team.id
+            neighbors_y = list()
+            for neighbor in self.comm_mat[row]:
+                if neighbor == 1:
+                    neighbors_y.append(self.Teams[neighbor].y_i)
+            
+            #Find max task bid
+            for i, x in enumerate(team.x_i):
+                if x == 1:
+                    max_bid = team.y_i[i]
+                    for y_k in neighbors_y:
+                        neighbor_bid = y_k[i]
+                        if neighbor_bid > max_bid:
+                            max_bid = neighbor_bid
+                            team.y_i[i] = max_bid
+                            team.x_i[i] = 0
 
+    def reached_consensus(self):
+        for team in self.Teams:
+            if team.y_previous != team.y_i:
+                return False
+        return True
+            
     def runSimulation(self, n_episodes):
         for i in range(n_episodes):
             # self.comm_mat = self.generate_COMM(n_teams) # uncomment for dynamic system
             self.task_mat = np.random.randint(2, size=(self.n_teams, self.n_tasks))
             self.generate_Z(self.comm_mat, self.task_mat)
-            self.generate_B(self.task_mat)
+
             consensus = False
-            self.auction_phase()
+            counter = 0
             while consensus != True: # Subject to change; Update the termination condition for consensus termination
-                # TODO: Phase 1 Auction
+                # Phase 0 Set up problem
+                self.generate_B(self.task_mat)
+                for team in self.Teams:
+                    team.y_previous = team.y_i
+                
+                # Phase 1 Auction
                 self.auction_phase()
-                # TODO: Phase 2 Consensus
+
+                # Phase 2 Consensus
+                self.consensus_phase()
+
+                # Phase 3: Did we reach consensus
+                if counter > 100:
+                    consensus = True
+                else:
+                    consensus = self.reached_consensus()
+                counter += 1
 
             # Get Task performance metrics and workload metrics
             # updateWorkload
