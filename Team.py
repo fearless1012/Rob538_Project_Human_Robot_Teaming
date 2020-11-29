@@ -29,7 +29,7 @@ class Human(object):
 			print("Invalid!")
 
 	def updateWorkload(self, n_tasks_assigned): # Update del_wl if needed 
-		del_wl = np.exp(n_tasks_assigned)
+		del_wl = n_tasks_assigned
 		self.cur_wl = self.wl_decay*self.cur_wl + del_wl
 
 class Robot(object):
@@ -44,6 +44,8 @@ class Team(object):
 		self.human = Human()
 		self.robot = Robot()
 		self.id = id_num
+		self.n_teams = n_teams
+		self.n_tasks = n_tasks
 
 		self.W_ul = W_ul
 		self.W_ol = W_ol
@@ -60,14 +62,14 @@ class Team(object):
 	def updateWorkload(self):
 		task_cnt = sum(self.x_i) - self.robot.task_assigned
 		self.human.updateWorkload(task_cnt)
-		self.cur_team_perf = self.n_tasks_assigned*self.human.task_perf
+		self.cur_team_perf = task_cnt*self.human.task_perf
 
 	def clearParams(self):
-		self.z_i = np.zeros(n_teams*n_tasks, dtype=int)
-		self.x_i = np.zeros(n_teams*n_tasks, dtype=int)
-		self.b_i = np.zeros(n_teams*n_tasks)
-		self.y_i = np.zeros(n_teams*n_tasks)
-		self.y_previous = np.zeros(n_teams*n_tasks)
+		self.z_i = np.zeros(self.n_teams*self.n_tasks, dtype=int)
+		self.x_i = np.zeros(self.n_teams*self.n_tasks, dtype=int)
+		self.b_i = np.zeros(self.n_teams*self.n_tasks)
+		self.y_i = np.zeros(self.n_teams*self.n_tasks)
+		self.y_previous = np.zeros(self.n_teams*self.n_tasks)
 
 		self.robot.task_assigned = -1
 
@@ -75,12 +77,12 @@ class Team(object):
 		z = []
 		for j in range(len(G)):
 			if G[j] == 1:
-				z += task_mat[j]
+				z += list(task_mat[j])
 			else:
-				z += np.zeros(n_tasks, dtype=int)
+				z += list(np.zeros(n_tasks, dtype=int))
 
 		# Sanity Check
-		if self.z_i.shape == z.shape:
+		if np.shape(self.z_i) == np.shape(z):
 			self.z_i = z
 		else:
 			print("Invalid shape Z")
@@ -95,7 +97,7 @@ class Team(object):
 			else:
 				self.robot.task_assigned = 0
 
-		for j in range(len(self.z)):
+		for j in range(len(self.z_i)):
 			if self.z_i[j] == 1:
 				task_cnt = sum(self.x_i) - self.robot.task_assigned
 				w_oj = self.human.cur_wl + np.exp(task_cnt + 1)
@@ -121,7 +123,7 @@ class Team(object):
 			self.robot.task_idx = idx
 
 		# Sanity Check
-		if self.b_i.shape == b_i.shape:
+		if np.shape(b_i) == np.shape(b_i):
 			self.b_i = b_i
 		else:
 			print("Invalid shape B")

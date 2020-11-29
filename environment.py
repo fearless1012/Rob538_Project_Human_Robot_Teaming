@@ -1,3 +1,4 @@
+from matplotlib.pyplot import colorbar
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
@@ -6,7 +7,7 @@ import random
 from Team import Team
 
 class World(object):
-    def __init__(self, n_teams=20, n_tasks=4, W_ul=10.0, W_ol=30.0):
+    def __init__(self, n_teams=4, n_tasks=3, W_ul=10.0, W_ol=100.0):
         self.n_teams = n_teams  
         self.n_tasks = n_tasks
         
@@ -24,7 +25,7 @@ class World(object):
     def generate_teams(self, n_teams, n_tasks):
         Teams = []
         for i in range(n_teams):
-            T = Team(n_teams, n_tasks, i, W_ul, W_ol)
+            T = Team(n_teams, n_tasks, i, self.W_ul, self.W_ol)
             Teams.append(T)
         return Teams
 
@@ -80,7 +81,7 @@ class World(object):
 
     def reached_consensus(self):
         for team in self.Teams:
-            if team.y_previous != team.y_i:
+            if team.y_previous.all() != team.y_i.all():
                 return False
         return True
             
@@ -126,7 +127,7 @@ class World(object):
             wl_t.append(wl)
 
         total_tasks = np.sum(self.task_mat)
-        system_perf  = system_perf/total_tasks
+        system_perf  = system_perf/(total_tasks*self.n_teams)
 
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
@@ -151,15 +152,16 @@ class World(object):
     def plot(self, wl_mean, wl_std, perf_mean, T):
         # moving average smoothing ??
         plt.clf()
-        x = arange(T)
+        x = range(T)
         plt.xlabel('Time Steps', fontsize=30)
         plt.ylabel('Workload Level', fontsize=30)
         plt.xticks(fontsize=20)
         plt.yticks(fontsize=20)
         plt.title("workload vs Timesteps", fontsize=35)
-        plt.errorbar(x, wl_mean, yerr=wl_std, label='Workload Variation')
+        plt.errorbar(x, wl_mean, yerr=wl_std, label='Workload Variation', ecolor="tab:red")
         # plt.legend(loc="upper right", fontsize=25)
         plt.xlim(-0.03*T, 1.10*T)
+        plt.ylim(0, 100)
         plt.grid()
         plt.show()
 
@@ -171,6 +173,7 @@ class World(object):
         plt.title("Performance Level vs Timesteps", fontsize=35)
         plt.plot(perf_mean, label='Performance Level')
         plt.xlim(-0.03*T, 1.10*T)
+        plt.ylim(0, 1)
         plt.grid()
         plt.show()
 
