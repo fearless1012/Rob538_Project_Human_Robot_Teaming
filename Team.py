@@ -51,6 +51,18 @@ class Team(object):
 		self.y_i = np.zeros(n_teams*n_tasks)
 		self.y_previous = np.zeros(n_teams*n_tasks)
 
+	def updateWorkload(self):
+		task_cnt = sum(self.x_i) - self.robot.task_assigned
+		self.human.updateWorkload(task_cnt)
+
+	def clearParams(self):
+		self.z_i = np.zeros(n_teams*n_tasks, dtype=int)
+		self.x_i = np.zeros(n_teams*n_tasks, dtype=int)
+		self.b_i = np.zeros(n_teams*n_tasks)
+		self.y_i = np.zeros(n_teams*n_tasks)
+
+		self.robot.task_assigned = -1
+
 	def updateZ(self, G, task_mat, n_tasks):
 		z = []
 		for j in range(len(G)):
@@ -78,9 +90,9 @@ class Team(object):
 		for j in range(len(self.z)):
 			if self.z_i[j] == 1:
 				task_cnt = sum(self.x_i) - self.robot.task_assigned
-				w_oj = self.cur_wl + np.exp(task_cnt + 1)
+				w_oj = self.human.cur_wl + np.exp(task_cnt + 1)
 				a_ij = self.human.task_perf*(self.W_ol - abs(self.W_nl - w_oj))
-				p_ij = (1-self.human.task_perf)*abs(w_oj - self.cur_wl)
+				p_ij = (1-self.human.task_perf)*abs(w_oj - self.human.cur_wl)
 				b_ij = a_ij - p_ij
 				b_i.append(b_ij)
 
@@ -93,7 +105,7 @@ class Team(object):
 
 		# TODO: update the robot.task_assigned value in h_ij
 		cur_team_task = list(task_mat[self.id])
-		if self.cur_wl > self.W_nl and sum(cur_team_task) > 0: # Checking to assign task to robot agent
+		if self.human.cur_wl > self.W_nl and sum(cur_team_task) > 0: # Checking to assign task to robot agent
 			idx = cur_team_task.index(1) # find the idx of the task
 			pos = self.id*n_tasks + idx # Find the task position in z_i
 			b_i[pos] = 1.1*b_i[pos] # Alter the corresponding bidding value by 10%
