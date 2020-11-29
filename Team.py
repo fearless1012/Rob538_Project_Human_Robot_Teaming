@@ -35,6 +35,7 @@ class Human(object):
 class Robot(object):
 	def __init__(self):
 		self.task_assigned = 0 # 0 if task is not assigned at time T; 1 if task is assigned
+		self.watch_pos = -1
 		self.task_idx = 0
 
 class Team(object):
@@ -49,7 +50,6 @@ class Team(object):
 		self.b_i = np.zeros(n_teams*n_tasks)
 		self.y_i = np.zeros(n_teams*n_tasks)
 		self.y_previous = np.zeros(n_teams*n_tasks)
-		self.j_i = 0
 
 	def updateZ(self, G, task_mat, n_tasks):
 		z = []
@@ -67,6 +67,14 @@ class Team(object):
 
 	def updateB(self, task_mat, n_tasks):
 		b_i = []
+
+		# Update robot.task_assigned
+		if self.robot.watch_pos >= 0:
+			if self.x_i[self.robot.watch_pos] == 1:
+				self.robot.task_assigned = 1
+			else:
+				self.robot.task_assigned = 0
+
 		for j in range(len(self.z)):
 			if self.z_i[j] == 1:
 				task_cnt = sum(self.x_i) - self.robot.task_assigned
@@ -89,19 +97,11 @@ class Team(object):
 			idx = cur_team_task.index(1) # find the idx of the task
 			pos = self.id*n_tasks + idx # Find the task position in z_i
 			b_i[pos] = 1.1*b_i[pos] # Alter the corresponding bidding value by 10%
-			self.watch_pos = pos
+			self.robot.watch_pos = pos
 			self.robot.task_idx = idx
 
-		self.b_i = b_i
-
-
-
-
-
-
-
-
-
-
-
-
+		# Sanity Check
+		if self.b_i.shape == b_i.shape:
+			self.b_i = b_i
+		else:
+			print("Invalid shape B")
