@@ -120,14 +120,16 @@ class World(object):
 
     def getMetrics(self):
         wl_t = []
+        h_t = []
         system_perf = 0.0
         for i in range(self.n_teams):
             wl = self.Teams[i].human.cur_wl
             system_perf += self.Teams[i].cur_team_perf
+            h_t.append(self.Teams[i].human.task_perf)
             wl_t.append(wl)
 
         total_tasks = np.sum(self.task_mat)
-        system_perf  = system_perf/(total_tasks*self.n_teams)
+        system_perf  = system_perf/(total_tasks*sum(h_t))
 
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
