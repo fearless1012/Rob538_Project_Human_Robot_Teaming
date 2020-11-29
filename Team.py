@@ -11,7 +11,7 @@ class Human(object):
 
 		self.cur_wl = 0.0
 		self.cur_task_cnt = 0
-
+		
 	def getParam(self):
 		if self.skill == 0: # Bad agent
 			self.wl_decay = random.uniform(0.8, 0.9)
@@ -39,11 +39,17 @@ class Robot(object):
 		self.task_idx = 0
 
 class Team(object):
-	def __init__(self, n_teams, n_tasks, id_num):
+	def __init__(self, n_teams, n_tasks, id_num, W_ul, W_ol):
 		skill = np.random.randint(3)
 		self.human = Human()
 		self.robot = Robot()
 		self.id = id_num
+
+		self.W_ul = W_ul
+		self.W_ol = W_ol
+		self.W_nl = (W_ul+W_ol)/2.0
+		
+		self.cur_team_perf = 0.0
 
 		self.z_i = np.zeros(n_teams*n_tasks, dtype=int)
 		self.x_i = np.zeros(n_teams*n_tasks, dtype=int)
@@ -54,12 +60,14 @@ class Team(object):
 	def updateWorkload(self):
 		task_cnt = sum(self.x_i) - self.robot.task_assigned
 		self.human.updateWorkload(task_cnt)
+		self.cur_team_perf = self.n_tasks_assigned*self.human.task_perf
 
 	def clearParams(self):
 		self.z_i = np.zeros(n_teams*n_tasks, dtype=int)
 		self.x_i = np.zeros(n_teams*n_tasks, dtype=int)
 		self.b_i = np.zeros(n_teams*n_tasks)
 		self.y_i = np.zeros(n_teams*n_tasks)
+		self.y_previous = np.zeros(n_teams*n_tasks)
 
 		self.robot.task_assigned = -1
 

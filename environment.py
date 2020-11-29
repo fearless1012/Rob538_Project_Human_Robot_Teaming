@@ -6,18 +6,25 @@ import random
 from Team import Team
 
 class World(object):
-    def __init__(self, n_teams=20, n_tasks=4):
+    def __init__(self, n_teams=20, n_tasks=4, W_ul=10.0, W_ol=30.0):
         self.n_teams = n_teams  
         self.n_tasks = n_tasks
+        
+        self.W_ul = W_ul
+        self.W_ol = W_ol
 
         self.Teams = self.generate_teams(n_teams, n_tasks)
         self.task_mat = np.random.randint(2, size=(n_teams, n_tasks))
         self.comm_mat = self.generate_COMM(n_teams)
 
+        self.wl_mean_metrics = []
+        self.wl_std_metrics = []
+        self.perf_metrics = []
+
     def generate_teams(self, n_teams, n_tasks):
         Teams = []
         for i in range(n_teams):
-            T = Team(n_teams, n_tasks, i)
+            T = Team(n_teams, n_tasks, i, W_ul, W_ol)
             Teams.append(T)
         return Teams
 
@@ -105,15 +112,74 @@ class World(object):
                 counter += 1
 
             self.updateWorkload() #  updateWorkload
-            
-            # Get Task performance metrics and workload metrics
-            
+            self.getMetrics()
             self.clearParams()
-            
+
+        self.plot(self.wl_mean_metrics, self.wl_std_metrics, self.perf_metrics, n_episodes)
+
+    def getMetrics(self):
+        wl_t = []
+        system_perf = 0.0
+        for i in range(self.n_teams):
+            wl = self.Teams[i].human.cur_wl
+            system_perf += self.Teams[i].cur_team_perf
+            wl_t.append(wl)
+
+        total_tasks = np.sum(self.task_mat)
+        system_perf  = system_perf/total_tasks
+
+        wl_mean = np.mean(wl_t)
+        wl_std = np.std(wl_t)
+
+        self.wl_mean_metrics.append(wl_mean)
+        self.wl_std_metrics.append(wl_std)
+        self.perf_metrics.append(system_perf)
+
+    def moving_average(self, reward_list, n=10):
+        ma_reward = []
+        N = len(reward_list)
+        for i in range(N):
+            end = i+n
+            if end < N:
+                cum = reward_list[i:end]
+                avg = np.sum(cum) / (len(cum))
+                ma_reward.append(avg)
+            else:
+                break
+        return ma_reward
+
+    def plot(self, wl_mean, wl_std, perf_mean, T):
+        # moving average smoothing ??
+        plt.clf()
+        x = arange(T)
+        plt.xlabel('Time Steps', fontsize=30)
+        plt.ylabel('Workload Level', fontsize=30)
+        plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
+        plt.title("workload vs Timesteps", fontsize=35)
+        plt.errorbar(x, wl_mean, yerr=wl_std, label='Workload Variation')
+        # plt.legend(loc="upper right", fontsize=25)
+        plt.xlim(-0.03*T, 1.10*T)
+        plt.grid()
+        plt.show()
+
+        plt.clf()
+        plt.xlabel('Time Steps', fontsize=30)
+        plt.ylabel('Performance Level', fontsize=30)
+        plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
+        plt.title("Performance Level vs Timesteps", fontsize=35)
+        plt.plot(perf_mean, label='Performance Level')
+        plt.xlim(-0.03*T, 1.10*T)
+        plt.grid()
+        plt.show()
+
 ##################################################################################################
 
 def main():
     world_obj = World()
+    n_episodes = 100
+    world_obj.runSimulation(n_episodes)
     
 if __name__ == '__main__':
     main()
