@@ -40,7 +40,11 @@ class World(object):
         pass
 
     def auction_phase(self):
-        pass
+        for team in self.Teams:
+            for j, b in enumerate(team.b_i):
+                if b > team.y_i[j]:
+                    team.x_i[j] = 1
+                    team.y_i[j] = b
 
     def consensus_phase(self):
         pass
@@ -51,10 +55,11 @@ class World(object):
             self.task_mat = np.random.randint(2, size=(self.n_teams, self.n_tasks))
             self.generate_Z(self.comm_mat, self.task_mat)
             self.generate_B(self.task_mat)
-            while self.consensus != True: # Subject to change; Update the termination condition for consensus termination
-                print('test')
+            consensus = False
+            self.auction_phase()
+            while consensus != True: # Subject to change; Update the termination condition for consensus termination
                 # TODO: Phase 1 Auction
-
+                self.auction_phase()
                 # TODO: Phase 2 Consensus
 
             # Get Task performance metrics and workload metrics
