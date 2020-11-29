@@ -36,9 +36,12 @@ class World(object):
         for i in range(self.n_teams):
             self.Teams[i].updateB(task_mat, self.n_tasks)
 
-    def updateParams(self):
+    def updateWorkload(self):
         for i in range(self.n_teams):
             self.Teams[i].updateWorkload()
+            
+    def clearParams(self):
+        for i in range(self.n_teams):
             self.Teams[i].clearParams()
 
     def auction_phase(self):
@@ -101,10 +104,11 @@ class World(object):
                     consensus = self.reached_consensus()
                 counter += 1
 
-            self.updateParams() #  updateWorkload
-
+            self.updateWorkload() #  updateWorkload
+            
             # Get Task performance metrics and workload metrics
             
+            self.clearParams()
             
 ##################################################################################################
 
