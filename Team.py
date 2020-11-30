@@ -28,8 +28,9 @@ class Human(object):
 		else:
 			print("Invalid!")
 
-	def updateWorkload(self, n_tasks_assigned): # Update del_wl if needed 
-		del_wl = n_tasks_assigned
+	def updateWorkload(self, n_tasks_assigned): # Update del_wl if needed
+		K = 5.0
+		del_wl = K*n_tasks_assigned
 		self.cur_wl = self.wl_decay*self.cur_wl + del_wl
 
 class Robot(object):
@@ -64,14 +65,21 @@ class Team(object):
 		self.human.updateWorkload(task_cnt)
 		self.cur_team_perf = task_cnt*self.human.task_perf
 
-	def clearParams(self):
+	def clearParams(self, reset_workload):
 		self.z_i = np.zeros(self.n_teams*self.n_tasks, dtype=int)
 		self.x_i = np.zeros(self.n_teams*self.n_tasks, dtype=int)
 		self.b_i = np.zeros(self.n_teams*self.n_tasks)
 		self.y_i = np.zeros(self.n_teams*self.n_tasks)
 		self.y_previous = np.zeros(self.n_teams*self.n_tasks)
 
-		self.robot.task_assigned = -1
+		self.robot.watch_pos = -1
+
+		if reset_workload == True:
+			self.human.cur_wl = 0.0
+			self.human.cur_task_cnt = 0
+
+			self.robot.task_assigned = 0 
+			self.robot.task_idx = 0
 
 	def updateZ(self, G, task_mat, n_tasks):
 		z = []
