@@ -148,7 +148,7 @@ class Team(object):
 			self.robot.task_idx = idx
 
 		# Sanity Check
-		if np.shape(b_i) == np.shape(b_i):
+		if np.shape(self.b_i) == np.shape(b_i):
 			self.b_i = b_i
 		else:
 			print("Invalid shape B")

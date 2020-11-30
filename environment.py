@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import random
 from Team import Team
+import time
 
 class World(object):
     def __init__(self, title, n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100, W_ul=20.0, W_ol=100.0):
@@ -150,7 +151,58 @@ class World(object):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
 
-            # TODO : NoCollab Task Allocation Algorithm
+            #NoCollab Task Allocation Algorithm
+            self.generate_Z(comm_mat, task_mat)
+            for team in self.Teams:
+                G = comm_mat[team.id]
+                z_i = list()
+                b_i = list()
+
+                #No collaboration - generate Z
+                for j in range(len(G)):
+                    if j == team.id:
+                        z_i += list(task_mat[j])
+                    else:
+                        z_i += list(np.zeros(self.n_tasks, dtype=int))
+                # Sanity Check
+                if np.shape(team.z_i) == np.shape(z_i):
+                    team.z_i = z_i
+                else:
+                    print("Invalid shape Z")
+
+                #No collaboration - generate B
+                for j in range(len(team.z_i)):
+                    if team.z_i[j] == 1:
+                        task_cnt = sum(team.x_i) - team.robot.task_assigned
+                        w_oj = team.human.cur_wl + np.exp(task_cnt + 1)
+                        a_ij = team.human.task_perf*(team.W_ol - abs(team.W_nl - w_oj))
+                        p_ij = (1-team.human.task_perf)*abs(w_oj - team.human.cur_wl)
+                        b_ij = a_ij - p_ij
+                        b_i.append(b_ij)
+                    elif team.z_i[j] == 0:
+                        b_ij = 0.0
+                        b_i.append(b_ij)
+                    else:
+                        print("Invalid z value in updateB")
+
+                cur_team_task = list(task_mat[team.id])
+                if team.human.cur_wl > team.W_nl and sum(cur_team_task) > 0: # Checking to assign task to robot agent
+                    idx = cur_team_task.index(1) # find the idx of the task
+                    pos = team.id*self.n_tasks + idx # Find the task position in z_i
+                    b_i[pos] = 1.1*b_i[pos] # Alter the corresponding bidding value by 10%
+                    team.robot.watch_pos = pos
+                    team.robot.task_idx = idx
+                # Sanity Check
+                if np.shape(team.b_i) == np.shape(b_i):
+                    team.b_i = b_i
+                else:
+                    print("Invalid shape B")
+
+                # No collaboration - task assignment
+                for i, b in enumerate(team.b_i):
+                    if b > 0:
+                        team.x_i[i] = 1
+                        team.y_i[i] = b
 
             self.updateWorkload()
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
@@ -177,7 +229,7 @@ class World(object):
 
     def runSimulation(self):
         self.runConsensusSimulation()
-        # self.runNoCollabSimulation()
+        self.runNoCollabSimulation()
         # self.runRandomSimulation()
         self.plot(title=self.title)
 
@@ -237,11 +289,11 @@ class World(object):
         plt.plot(x, con_wl, '-', label='Consensus', color='red')
         plt.fill_between(x, con_wl_errm, con_wl_errp, color='red', alpha=0.2)
         
-        # plt.plot(x, ncb_wl, '-', label='No Collaboration', color='green')
-        # plt.fill_between(x, ncb_wl_errm, ncb_wl_errp, color='green', alpha=0.2)
+        plt.plot(x, ncb_wl, '-', label='No Collaboration', color='green')
+        plt.fill_between(x, ncb_wl_errm, ncb_wl_errp, color='green', alpha=0.2)
 
         # plt.plot(x, ran_wl, '-', label='Random', color='blue')
-        # plt.fill_between(x, ran_wl_errm, ran_wl_errp color='blue', alpha=0.2)
+        # plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
 
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.10*self.n_episodes)
@@ -257,7 +309,7 @@ class World(object):
         plt.title(title+" Performance", fontsize=40)
 
         plt.plot(x, con_perf, '-', label='Consensus', color='red')
-        # plt.plot(x, ncb_perf, '-', label='No Collaboration', color='green')
+        plt.plot(x, ncb_perf, '-', label='No Collaboration', color='green')
         # plt.plot(x, ran_perf, '-', label='Random', color='blue')
         
         plt.legend(loc="upper right", fontsize=30)
@@ -273,8 +325,8 @@ def main():
 
 #     # Comparison 1: Environment
 #     # Scenario 1a: Static with 20 teams & 4 tasks and Mixed Capabilities
-#     world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-#     world_obj_1a.runSimulation()
+    world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_1a.runSimulation()
 
 #     # Comparison 1: Environment
 #     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
