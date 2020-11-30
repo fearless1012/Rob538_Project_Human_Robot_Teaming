@@ -5,31 +5,48 @@ from collections import Counter
 import random
 
 class Human(object):
-	def __init__(self):
-		self.skill = np.random.randint(3) 		# 0, 1, 2
-		self.getParam()
-
+	def __init__(self, capability):
+		skill = self.getSkill(capability)
+		self.getParam(skill)
 		self.cur_wl = 0.0
 		self.cur_task_cnt = 0
 		
-	def getParam(self):
-		if self.skill == 0: # Bad agent
+	def getSkill(self, capability):
+		skill = -1
+		if capability == 'mixed':
+			skill = np.random.randint(3) # 0, 1, 2
+		
+		elif capability == 'bad':
+			skill = 0
+
+		elif capability == 'avg':
+			skill = 1
+
+		elif capability == 'good':
+			skill = 2
+
+		else:
+			print("Invalid capability in Human() class!")
+		return skill
+		
+	def getParam(self, skill):
+		if skill == 0: # Bad agent
 			self.wl_decay = random.uniform(0.8, 0.9)
 			self.task_perf = random.uniform(0.5, 0.6)
 
-		elif self.skill == 1: # Avg agent
+		elif skill == 1: # Avg agent
 			self.wl_decay = random.uniform(0.7, 0.8)
 			self.task_perf = random.uniform(0.7, 0.8)
 
-		elif self.skill == 2: # Good agent
+		elif skill == 2: # Good agent
 			self.wl_decay = random.uniform(0.6, 0.7)
 			self.task_perf = random.uniform(0.9, 1.0)
 
 		else:
-			print("Invalid!")
+			print("Invalid Skill!")
 
 	def updateWorkload(self, n_tasks_assigned): # Update del_wl if needed
-		K = 5.0
+		K = 1.0
 		del_wl = K*n_tasks_assigned
 		self.cur_wl = self.wl_decay*self.cur_wl + del_wl
 
@@ -40,9 +57,9 @@ class Robot(object):
 		self.task_idx = 0
 
 class Team(object):
-	def __init__(self, n_teams, n_tasks, id_num, W_ul, W_ol):
+	def __init__(self, n_teams, n_tasks, id_num, capability, W_ul, W_ol):
 		skill = np.random.randint(3)
-		self.human = Human()
+		self.human = Human(capability)
 		self.robot = Robot()
 		self.id = id_num
 		self.n_teams = n_teams

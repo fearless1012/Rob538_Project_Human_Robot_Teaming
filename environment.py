@@ -7,13 +7,14 @@ import random
 from Team import Team
 
 class World(object):
-    def __init__(self, n_teams=4, n_tasks=3, static=True, W_ul=20.0, W_ol=100.0, n_episodes=100):
+    def __init__(self, title, n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100, W_ul=20.0, W_ol=100.0):
+        self.title = title
         self.n_teams = n_teams  
         self.n_tasks = n_tasks
         self.static = static
         self.n_episodes = n_episodes
 
-        self.Teams = self.generate_teams(n_teams, n_tasks, W_ul, W_ol)
+        self.Teams = self.generate_teams(n_teams, n_tasks, capability, W_ul, W_ol)
         self.task_mat_set = self.generate_TaskSet(n_teams, n_tasks, n_episodes)
         self.comm_mat_set = self.generate_COMMSet(n_teams, static, n_episodes)
 
@@ -30,10 +31,10 @@ class World(object):
         self.random_wl_std = []
         self.random_perf = []
 
-    def generate_teams(self, n_teams, n_tasks, W_ul, W_ol):
+    def generate_teams(self, n_teams, n_tasks, capability, W_ul, W_ol):
         Teams = []
         for i in range(n_teams):
-            T = Team(n_teams, n_tasks, i, W_ul, W_ol)
+            T = Team(n_teams, n_tasks, i, capability, W_ul, W_ol)
             Teams.append(T)
         return Teams
 
@@ -178,7 +179,7 @@ class World(object):
         self.runConsensusSimulation()
         # self.runNoCollabSimulation()
         # self.runRandomSimulation()
-        self.plot()
+        self.plot(title=self.title)
 
     def getMetrics(self, task_mat):
         wl_t = []
@@ -269,9 +270,44 @@ class World(object):
 ##################################################################################################
 
 def main():
-    world_obj = World(n_episodes=100)
-    world_obj.runSimulation()
-    
+
+#     # Comparison 1: Environment
+#     # Scenario 1a: Static with 20 teams & 4 tasks and Mixed Capabilities
+#     world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+#     world_obj_1a.runSimulation()
+
+#     # Comparison 1: Environment
+#     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
+#     world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
+#     world_obj_1b.runSimulation()
+
+# # ####################################################################################################
+
+#     # Comparison 2: Team Scalability
+#     # Scenario 2a: Static with 10 teams and Mixed Capabilities
+#     world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+#     world_obj_2a.runSimulation()
+
+#     # Comparison 2: Team Scalability
+#     # Scenario 2b: Static with 50 teams and Mixed Capabilities
+#     world_obj_2b = World(title='50 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+#     world_obj_2b.runSimulation()
+
+
+# # ###################################################################################################
+
+#     # Comparison 3: Team Capabilities
+#     # Scenario 3a: Static with 20 teams and all are bad teams
+#     n_episodes = 100
+#     world_obj_3a = World(title='Only Bad Teams:', n_teams=20, n_tasks=4, static=True, capability='bad', n_episodes=100)
+#     world_obj_3a.runSimulation()
+
+
+#     # Comparison 3: Team Capabilities
+#     # Scenario 3b: Static with 20 teams and all good agents   
+#     world_obj_3b = World(title='Only Good Teams:', n_teams=20, n_tasks=4, static=True, capability='good', n_episodes=100)
+#     world_obj_3b.runSimulation()
+
 if __name__ == '__main__':
     main()
 
