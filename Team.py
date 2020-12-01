@@ -32,15 +32,15 @@ class Human(object):
 	def getParam(self, skill):
 		if skill == 0: # Bad agent
 			self.wl_decay = random.uniform(0.50, 0.75)
-			self.task_perf = random.uniform(0.01, 0.25) *100.0
+			self.task_perf = random.uniform(0.25, 0.5)
 
 		elif skill == 1: # Avg agent
 			self.wl_decay = random.uniform(0.25, 0.50)
-			self.task_perf = random.uniform(0.25, 0.50) * 100.0
+			self.task_perf = random.uniform(0.5, 0.75)
 
 		elif skill == 2: # Good agent
-			self.wl_decay = random.uniform(0.01, 0.25)
-			self.task_perf = random.uniform(0.50, 1.0) * 100.0
+			self.wl_decay = random.uniform(0.1, 0.25)
+			self.task_perf = random.uniform(0.75, 0.9)
 
 		else:
 			print("Invalid Skill!")
@@ -132,7 +132,7 @@ class Team(object):
 				human_task_cnt = sum(self.x_i) - self.robot.task_assigned
 				w_oj = self.human.cur_wl + self.human.delWorkload(human_task_cnt + 1)
 				a_ij = self.human.task_perf*(self.W_ol - abs(self.W_nl - w_oj))
-				p_ij = (100.0-self.human.task_perf)*abs(w_oj - self.human.cur_wl)
+				p_ij = (1.-self.human.task_perf)*abs(w_oj - self.human.cur_wl)
 				b_ij = a_ij - p_ij
 				b_i.append(b_ij)
 
