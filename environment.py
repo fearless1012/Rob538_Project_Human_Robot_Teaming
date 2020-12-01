@@ -86,10 +86,16 @@ class World(object):
 
     def auction_phase(self):
         for team in self.Teams:
+            max_bid = -1
+            max_index = -1
             for j, b in enumerate(team.b_i):
-                if b > team.y_i[j]:
-                    team.x_i[j] = 1
-                    team.y_i[j] = b
+                if b > team.y_i[j] and team.x_i[j] != 1:
+                    max_bid = b
+                    max_index = j
+
+            if max_bid > 0:
+                team.x_i[max_index] = 1
+                team.y_i[max_index] = max_bid
 
     def consensus_phase(self, comm_mat):
         for team in self.Teams:
@@ -103,15 +109,15 @@ class World(object):
                     neighbors.append(i)
             
             #Find max task bid
-            for i, x in enumerate(team.x_i):
-                if x == 1:
-                    max_bid = team.y_i[i]
-                    for y_k in neighbors_y:
-                        neighbor_bid = y_k[i]
-                        if neighbor_bid > max_bid:
-                            max_bid = neighbor_bid
-                            team.y_i[i] = max_bid
-                            team.x_i[i] = 0
+            for i, y in enumerate(team.y_i):
+                max_bid = team.y_i[i]
+                for y_k in neighbors_y:
+                    neighbor_bid = y_k[i]
+                    if neighbor_bid > max_bid:
+                        max_bid = neighbor_bid
+                        team.y_i[i] = max_bid
+                        team.x_i[i] = 0
+
     def reached_consensus(self):
         for team in self.Teams:
             if not np.array_equal(team.y_previous, team.y_i):
@@ -119,6 +125,7 @@ class World(object):
         return True
             
     def runConsensusSimulation(self):
+        print("Running consensus")
         for i in range(self.n_episodes):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
@@ -130,7 +137,7 @@ class World(object):
                 # Phase 0 Set up problem
                 self.generate_B(task_mat)
                 for team in self.Teams:
-                    team.y_previous = copy.deepcopy(team.y_i)
+                    team.x_previous = copy.deepcopy(team.x_i)
                 
                 self.auction_phase() # Phase 1 Auction
                 self.consensus_phase(comm_mat)  # Phase 2 Consensus
@@ -150,6 +157,7 @@ class World(object):
         self.clearParams(reset_workload=True)
 
     def runNoCollabSimulation(self):
+        print("Running no collab")
         for i in range(self.n_episodes):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
@@ -216,6 +224,7 @@ class World(object):
         self.clearParams(reset_workload=True)
         
     def runRandomSimulation(self):
+        print("Running random")
         for i in range(self.n_episodes):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
@@ -241,7 +250,6 @@ class World(object):
 
             self.updateWorkload()
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
-            print(wl_mean)
             self.random_wl_mean.append(wl_mean)
             self.random_wl_std.append(wl_std)
             self.random_perf.append(perf_mean)
@@ -269,9 +277,9 @@ class World(object):
         total_tasks = np.sum(task_mat)
         perf_mean  = system_perf/(total_tasks) * 100.0
         
-        # print(system_perf, total_tasks, total_tasks*sum(h_t))
-        # print(tasks_assigned, total_tasks, perf_mean)
-        
+        # print("Perf: {}, Total task: {}, Tasks Weight: {}".format(system_perf, total_tasks, total_tasks*sum(h_t)))
+        # print("Assigned {} Total {} Avg Perf {}".format(tasks_assigned, total_tasks, perf_mean))
+
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
         return wl_mean, wl_std, perf_mean
@@ -356,8 +364,8 @@ def main():
 
     # Comparison 1: Environment
     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
-    world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
-    world_obj_1b.runSimulation()
+    # world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
+    # world_obj_1b.runSimulation()
 
 # # ####################################################################################################
 

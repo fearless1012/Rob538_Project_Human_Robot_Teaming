@@ -79,6 +79,7 @@ class Team(object):
 		self.x_i = np.zeros(n_teams*n_tasks, dtype=int)
 		self.b_i = np.zeros(n_teams*n_tasks)
 		self.y_i = np.zeros(n_teams*n_tasks)
+		self.x_previous = np.zeros(n_teams*n_tasks)
 		self.y_previous = np.zeros(n_teams*n_tasks)
 
 	def updateWorkload(self):
@@ -92,6 +93,7 @@ class Team(object):
 		self.x_i = np.zeros(self.n_teams*self.n_tasks, dtype=int)
 		self.b_i = np.zeros(self.n_teams*self.n_tasks)
 		self.y_i = np.zeros(self.n_teams*self.n_tasks)
+		self.x_previous = np.zeros(self.n_teams*self.n_tasks)
 		self.y_previous = np.zeros(self.n_teams*self.n_tasks)
 
 		self.robot.watch_pos = -1
