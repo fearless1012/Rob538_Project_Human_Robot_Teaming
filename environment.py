@@ -328,8 +328,8 @@ def main():
 
 #     # Comparison 1: Environment
 #     # Scenario 1a: Static with 20 teams & 4 tasks and Mixed Capabilities
-    # world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-    # world_obj_1a.runSimulation()
+    world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_1a.runSimulation()
 
 #     # Comparison 1: Environment
 #     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
@@ -340,13 +340,13 @@ def main():
 
 #     # Comparison 2: Team Scalability
 #     # Scenario 2a: Static with 10 teams and Mixed Capabilities
-    world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-    world_obj_2a.runSimulation()
+    # world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    # world_obj_2a.runSimulation()
 
 #     # Comparison 2: Team Scalability
 #     # Scenario 2b: Static with 50 teams and Mixed Capabilities
-    world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-    world_obj_2b.runSimulation()
+    # world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    # world_obj_2b.runSimulation()
 
 
 # # ###################################################################################################

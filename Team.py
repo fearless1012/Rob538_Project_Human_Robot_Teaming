@@ -126,8 +126,8 @@ class Team(object):
 			if self.z_i[j] == 1:
 				task_cnt = sum(self.x_i) - self.robot.task_assigned
 				w_oj = self.human.cur_wl + np.exp(task_cnt + 1)
-				a_ij = self.human.task_perf*(self.W_ol - abs(self.W_nl - w_oj))
-				p_ij = (1-self.human.task_perf)*abs(w_oj - self.human.cur_wl)
+				a_ij = self.W_ol - abs(self.W_nl - w_oj)#self.human.task_perf*(self.W_ol - abs(self.W_nl - w_oj))
+				p_ij = self.human.cur_wl#(1-self.human.task_perf)*abs(w_oj - self.human.cur_wl)
 				b_ij = a_ij - p_ij
 				b_i.append(b_ij)
 
