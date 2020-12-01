@@ -341,7 +341,7 @@ class World(object):
 
         plt.plot(x, con_perf, '-', label='Consensus', color='red')
         plt.plot(x, ncb_perf, '-', label='No Collaboration', color='green')
-        # plt.plot(x, ran_perf, '-', label='Random', color='blue')
+        plt.plot(x, ran_perf, '-', label='Random', color='blue')
         
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.03*self.n_episodes)
