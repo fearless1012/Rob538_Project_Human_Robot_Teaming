@@ -236,7 +236,7 @@ class World(object):
                     team.x_i[random_task] = 1
                     for team_update in self.Teams:
                         team_update.z_i[random_task] = 0
-                    human_task_cnt += human_task_cnt
+                    human_task_cnt += 1
                     w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
 
             self.updateWorkload()
@@ -251,7 +251,7 @@ class World(object):
     def runSimulation(self):
         self.runConsensusSimulation()
         self.runNoCollabSimulation()
-        # self.runRandomSimulation()
+        self.runRandomSimulation()
         self.plot(title=self.title)
 
     def getMetrics(self, task_mat):
@@ -269,8 +269,8 @@ class World(object):
         total_tasks = np.sum(task_mat)
         perf_mean  = system_perf/(total_tasks) * 100.0
         
-        # print(system_perf, total_tasks, total_tasks*sum(h_t))
-        # print(tasks_assigned, total_tasks, perf_mean)
+        print(system_perf, total_tasks, total_tasks*sum(h_t))
+        print(tasks_assigned, total_tasks, perf_mean)
         
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
@@ -319,8 +319,8 @@ class World(object):
         plt.plot(x, ncb_wl, '-', label='No Collaboration', color='green')
         plt.fill_between(x, ncb_wl_errm, ncb_wl_errp, color='green', alpha=0.2)
 
-        # plt.plot(x, ran_wl, '-', label='Random', color='blue')
-        # plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
+        plt.plot(x, ran_wl, '-', label='Random', color='blue')
+        plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
 
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.10*self.n_episodes)
