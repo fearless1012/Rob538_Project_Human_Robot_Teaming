@@ -223,25 +223,29 @@ class World(object):
             #random allocation
             self.generate_Z(comm_mat, task_mat)
 
-            for team in self.Teams:
-                row = team.id
-                tasks_avail = []
-                for i in range(len(team.z_i)):
-                    if team.z_i[i] == 1:
-                        tasks_avail.append(i)
-                human_task_cnt = 0
-                w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
-                while w_oj <= team.W_nl:
-                    random_task = random.choice(tasks_avail)
-                    team.x_i[random_task] = 1
-                    for team_update in self.Teams:
-                        team_update.z_i[random_task] = 0
-                    human_task_cnt += 1
+            unallocated_tasks = 0
+            for team_update in self.Teams:
+                unallocated_tasks += sum(team_update.z_i)
+
+            while unallocated_tasks > 0:
+                for team in self.Teams:
+                    human_task_cnt = sum(team.x_i)
                     w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
+                    if w_oj <= team.W_nl and sum(team.z_i) > 0:
+                        row = team.id
+                        tasks_avail = []
+                        for i in range(len(team.z_i)):
+                            if team.z_i[i] == 1:
+                                tasks_avail.append(i)
+                        random_task = random.choice(tasks_avail)
+                        team.x_i[random_task] = 1
+                        unallocated_tasks = 0
+                        for team_update in self.Teams:
+                            team_update.z_i[random_task] = 0
+                            unallocated_tasks += sum(team_update.z_i)
 
             self.updateWorkload()
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
-            print(wl_mean)
             self.random_wl_mean.append(wl_mean)
             self.random_wl_std.append(wl_std)
             self.random_perf.append(perf_mean)
