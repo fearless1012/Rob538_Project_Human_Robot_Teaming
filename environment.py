@@ -256,14 +256,20 @@ class World(object):
         wl_t = []
         h_t = []
         system_perf = 0.0
+        tasks_assigned = 0
         for i in range(self.n_teams):
             wl = self.Teams[i].human.cur_wl
+            tasks_assigned += sum(self.Teams[i].x_i)
             system_perf += self.Teams[i].cur_team_perf
             h_t.append(self.Teams[i].human.task_perf)
             wl_t.append(wl)
 
         total_tasks = np.sum(task_mat)
-        perf_mean  = system_perf/(total_tasks*sum(h_t))
+        # perf_mean  = system_perf/(total_tasks*sum(h_t))
+
+        perf_mean = (tasks_assigned/total_tasks)*100.0
+        print(task_assigned, total_tasks, perf_mean)
+        
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
         return wl_mean, wl_std, perf_mean
@@ -333,7 +339,7 @@ class World(object):
         
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.03*self.n_episodes)
-        plt.ylim(0, 1.2)
+        plt.ylim(0, 100)
         plt.grid()
         plt.show()
 
