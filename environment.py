@@ -232,21 +232,26 @@ class World(object):
             #random allocation
             self.generate_Z(comm_mat, task_mat)
 
-            for team in self.Teams:
-                row = team.id
-                tasks_avail = []
-                for i in range(len(team.z_i)):
-                    if team.z_i[i] == 1:
-                        tasks_avail.append(i)
-                human_task_cnt = 0
-                w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
-                while w_oj <= team.W_nl:
-                    random_task = random.choice(tasks_avail)
-                    team.x_i[random_task] = 1
-                    for team_update in self.Teams:
-                        team_update.z_i[random_task] = 0
-                    human_task_cnt += human_task_cnt
+            unallocated_tasks = 0
+            for team_update in self.Teams:
+                unallocated_tasks += sum(team_update.z_i)
+
+            while unallocated_tasks > 0:
+                for team in self.Teams:
+                    human_task_cnt = sum(team.x_i)
                     w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
+                    if sum(team.z_i) > 0:
+                        row = team.id
+                        tasks_avail = []
+                        for i in range(len(team.z_i)):
+                            if team.z_i[i] == 1:
+                                tasks_avail.append(i)
+                        random_task = random.choice(tasks_avail)
+                        team.x_i[random_task] = 1
+                        unallocated_tasks = 0
+                        for team_update in self.Teams:
+                            team_update.z_i[random_task] = 0
+                            unallocated_tasks += sum(team_update.z_i)
 
             self.updateWorkload()
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
@@ -259,7 +264,7 @@ class World(object):
     def runSimulation(self):
         self.runConsensusSimulation()
         self.runNoCollabSimulation()
-        # self.runRandomSimulation()
+        self.runRandomSimulation()
         self.plot(title=self.title)
 
     def getMetrics(self, task_mat):
@@ -279,7 +284,6 @@ class World(object):
         
         # print("Perf: {}, Total task: {}, Tasks Weight: {}".format(system_perf, total_tasks, total_tasks*sum(h_t)))
         # print("Assigned {} Total {} Avg Perf {}".format(tasks_assigned, total_tasks, perf_mean))
-
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
         return wl_mean, wl_std, perf_mean
@@ -327,8 +331,8 @@ class World(object):
         plt.plot(x, ncb_wl, '-', label='No Collaboration', color='green')
         plt.fill_between(x, ncb_wl_errm, ncb_wl_errp, color='green', alpha=0.2)
 
-        # plt.plot(x, ran_wl, '-', label='Random', color='blue')
-        # plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
+        plt.plot(x, ran_wl, '-', label='Random', color='blue')
+        plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
 
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.10*self.n_episodes)
