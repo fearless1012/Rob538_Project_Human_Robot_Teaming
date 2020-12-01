@@ -229,13 +229,15 @@ class World(object):
                 for i in range(len(team.z_i)):
                     if team.z_i[i] == 1:
                         tasks_avail.append(i)
-                team.updateWorkload()
-                while team.human.cur_wl <= team.W_nl:
+                human_task_cnt = 0
+                w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
+                while w_oj <= team.W_nl:
                     random_task = random.choice(tasks_avail)
                     team.x_i[random_task] = 1
                     for team_update in self.Teams:
                         team_update.z_i[random_task] = 0
-                    team.updateWorkload()
+                    human_task_cnt += human_task_cnt
+                    w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
 
             self.updateWorkload()
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
