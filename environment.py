@@ -355,13 +355,13 @@ def main():
 
 #     # Comparison 2: Team Scalability
 #     # Scenario 2a: Static with 10 teams and Mixed Capabilities
-#     world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-#     world_obj_2a.runSimulation()
+    # world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    # world_obj_2a.runSimulation()
 
-# #     # Comparison 2: Team Scalability
-# #     # Scenario 2b: Static with 50 teams and Mixed Capabilities
-#     world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-#     world_obj_2b.runSimulation()
+#     # Comparison 2: Team Scalability
+#     # Scenario 2b: Static with 50 teams and Mixed Capabilities
+    # world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    # world_obj_2b.runSimulation()
 
 
 # # ###################################################################################################
