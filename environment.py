@@ -10,7 +10,7 @@ import time
 np.set_printoptions(precision = 3, linewidth=1000)
 
 class World(object):
-    def __init__(self, title, n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100, W_ul=20.0, W_ol=100.0):
+    def __init__(self, title, n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100, W_ul=50.0, W_ol=100.0):
         self.title = title
         self.n_teams = n_teams  
         self.n_tasks = n_tasks
@@ -176,10 +176,10 @@ class World(object):
                 #No collaboration - generate B
                 for j in range(len(team.z_i)):
                     if team.z_i[j] == 1:
-                        task_cnt = sum(team.x_i) - team.robot.task_assigned
-                        w_oj = team.human.cur_wl + np.exp(task_cnt + 1)
+                        human_task_cnt = sum(team.x_i) - team.robot.task_assigned
+                        w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
                         a_ij = team.human.task_perf*(team.W_ol - abs(team.W_nl - w_oj))
-                        p_ij = (1-team.human.task_perf)*abs(w_oj - team.human.cur_wl)
+                        p_ij = (100.-team.human.task_perf)*abs(w_oj - team.human.cur_wl)
                         b_ij = a_ij - p_ij
                         b_i.append(b_ij)
                     elif team.z_i[j] == 0:
@@ -189,7 +189,7 @@ class World(object):
                         print("Invalid z value in updateB")
 
                 cur_team_task = list(task_mat[team.id])
-                if team.human.cur_wl > team.W_nl and sum(cur_team_task) > 0: # Checking to assign task to robot agent
+                if team.human.cur_wl > team.W_ol and sum(cur_team_task) > 0: # Checking to assign task to robot agent
                     idx = cur_team_task.index(1) # find the idx of the task
                     pos = team.id*self.n_tasks + idx # Find the task position in z_i
                     b_i[pos] = 1.1*b_i[pos] # Alter the corresponding bidding value by 10%

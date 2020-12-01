@@ -71,7 +71,7 @@ class Team(object):
 
 		self.W_ul = W_ul
 		self.W_ol = W_ol
-		self.W_nl = 0.75*W_ol #(W_ul+W_ol)/2.0
+		self.W_nl = (W_ul+W_ol)/2.0
 		
 		self.cur_team_perf = 0.0
 
