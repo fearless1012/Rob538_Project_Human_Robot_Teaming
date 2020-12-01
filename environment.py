@@ -220,10 +220,27 @@ class World(object):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
 
-            # TODO : Random Task Allocation Algorithm
+            #random allocation
+
+            self.generate_Z(comm_mat, task_mat)
+
+            for team in self.Teams:
+                row = team.id
+                tasks_avail = []
+                for i in range(len(team.z_i)):
+                    if team.z_i[i] == 1:
+                        tasks_avail.append(i)
+                team.updateWorkload()
+                while team.human.cur_wl <= team.W_nl:
+                    random_task = random.choice(tasks_avail)
+                    team.x_i[random_task] = 1
+                    for team_update in self.Teams:
+                        team_update.z_i[random_task] = 0
+                    team.updateWorkload()
 
             self.updateWorkload()
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
+            print(wl_mean)
             self.random_wl_mean.append(wl_mean)
             self.random_wl_std.append(wl_std)
             self.random_perf.append(perf_mean)
@@ -233,7 +250,7 @@ class World(object):
     def runSimulation(self):
         self.runConsensusSimulation()
         self.runNoCollabSimulation()
-        # self.runRandomSimulation()
+        self.runRandomSimulation()
         self.plot(title=self.title)
 
     def getMetrics(self, task_mat):
@@ -295,8 +312,8 @@ class World(object):
         plt.plot(x, ncb_wl, '-', label='No Collaboration', color='green')
         plt.fill_between(x, ncb_wl_errm, ncb_wl_errp, color='green', alpha=0.2)
 
-        # plt.plot(x, ran_wl, '-', label='Random', color='blue')
-        # plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
+        plt.plot(x, ran_wl, '-', label='Random', color='blue')
+        plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
 
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.10*self.n_episodes)
@@ -313,14 +330,14 @@ class World(object):
 
         plt.plot(x, con_perf, '-', label='Consensus', color='red')
         plt.plot(x, ncb_perf, '-', label='No Collaboration', color='green')
-        # plt.plot(x, ran_perf, '-', label='Random', color='blue')
+        plt.plot(x, ran_perf, '-', label='Random', color='blue')
         
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.03*self.n_episodes)
         plt.ylim(0, 1.2)
         plt.grid()
         plt.show()
-        # plt.errorbar(x, wl_mean, yerr=wl_std, label='Consensus', ecolor="red")
+        plt.errorbar(x, wl_mean, yerr=wl_std, label='Consensus', ecolor="red")
 
 ##################################################################################################
 
