@@ -231,7 +231,7 @@ class World(object):
                 for team in self.Teams:
                     human_task_cnt = sum(team.x_i)
                     w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
-                    if w_oj <= team.W_nl and sum(team.z_i) > 0:
+                    if sum(team.z_i) > 0:
                         row = team.id
                         tasks_avail = []
                         for i in range(len(team.z_i)):
