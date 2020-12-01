@@ -220,10 +220,26 @@ class World(object):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
 
-            # TODO : Random Task Allocation Algorithm
+            #random allocation
+            self.generate_Z(comm_mat, task_mat)
+
+            for team in self.Teams:
+                row = team.id
+                tasks_avail = []
+                for i in range(len(team.z_i)):
+                    if team.z_i[i] == 1:
+                        tasks_avail.append(i)
+                team.updateWorkload()
+                while team.human.cur_wl <= team.W_nl:
+                    random_task = random.choice(tasks_avail)
+                    team.x_i[random_task] = 1
+                    for team_update in self.Teams:
+                        team_update.z_i[random_task] = 0
+                    team.updateWorkload()
 
             self.updateWorkload()
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
+            print(wl_mean)
             self.random_wl_mean.append(wl_mean)
             self.random_wl_std.append(wl_std)
             self.random_perf.append(perf_mean)
@@ -320,7 +336,6 @@ class World(object):
         plt.ylim(0, 1.2)
         plt.grid()
         plt.show()
-        # plt.errorbar(x, wl_mean, yerr=wl_std, label='Consensus', ecolor="red")
 
 ##################################################################################################
 
@@ -331,10 +346,10 @@ def main():
     world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
     world_obj_1a.runSimulation()
 
-#     # Comparison 1: Environment
-#     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
-#     world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
-#     world_obj_1b.runSimulation()
+    # Comparison 1: Environment
+    # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
+    world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
+    world_obj_1b.runSimulation()
 
 # # ####################################################################################################
 

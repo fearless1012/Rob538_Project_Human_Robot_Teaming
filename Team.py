@@ -31,24 +31,28 @@ class Human(object):
 		
 	def getParam(self, skill):
 		if skill == 0: # Bad agent
-			self.wl_decay = random.uniform(0.8, 0.9)
-			self.task_perf = random.uniform(0.5, 0.6)
+			self.wl_decay = random.uniform(0.50, 0.75)
+			self.task_perf = random.uniform(0.01, 0.25) *100.0
 
 		elif skill == 1: # Avg agent
-			self.wl_decay = random.uniform(0.7, 0.8)
-			self.task_perf = random.uniform(0.7, 0.8)
+			self.wl_decay = random.uniform(0.25, 0.50)
+			self.task_perf = random.uniform(0.25, 0.50) * 100.0
 
 		elif skill == 2: # Good agent
-			self.wl_decay = random.uniform(0.6, 0.7)
-			self.task_perf = random.uniform(0.9, 1.0)
+			self.wl_decay = random.uniform(0.01, 0.25)
+			self.task_perf = random.uniform(0.50, 1.0) * 100.0
 
 		else:
 			print("Invalid Skill!")
 
 	def updateWorkload(self, n_tasks_assigned): # Update del_wl if needed
-		K = 1.0
-		del_wl = K*n_tasks_assigned
+		del_wl = self.delWorkload(n_tasks_assigned)
 		self.cur_wl = self.wl_decay*self.cur_wl + del_wl
+
+	def delWorkload(self, n_tasks):
+		K = 5.0
+		del_wl = K*n_tasks
+		return del_wl
 
 class Robot(object):
 	def __init__(self):
@@ -67,7 +71,7 @@ class Team(object):
 
 		self.W_ul = W_ul
 		self.W_ol = W_ol
-		self.W_nl = (W_ul+W_ol)/2.0
+		self.W_nl = 0.75*W_ol #(W_ul+W_ol)/2.0
 		
 		self.cur_team_perf = 0.0
 
@@ -78,9 +82,10 @@ class Team(object):
 		self.y_previous = np.zeros(n_teams*n_tasks)
 
 	def updateWorkload(self):
-		task_cnt = sum(self.x_i) - self.robot.task_assigned
-		self.human.updateWorkload(task_cnt)
-		self.cur_team_perf = task_cnt*self.human.task_perf
+		total_task_cnt = sum(self.x_i) 
+		human_cnt = total_task_cnt - self.robot.task_assigned
+		self.human.updateWorkload(human_cnt)
+		self.cur_team_perf = total_task_cnt*self.human.task_perf
 
 	def clearParams(self, reset_workload):
 		self.z_i = np.zeros(self.n_teams*self.n_tasks, dtype=int)
@@ -124,10 +129,10 @@ class Team(object):
 
 		for j in range(len(self.z_i)):
 			if self.z_i[j] == 1:
-				task_cnt = sum(self.x_i) - self.robot.task_assigned
-				w_oj = self.human.cur_wl + np.exp(task_cnt + 1)
-				a_ij = self.W_ol - abs(self.W_nl - w_oj)#self.human.task_perf*(self.W_ol - abs(self.W_nl - w_oj))
-				p_ij = self.human.cur_wl#(1-self.human.task_perf)*abs(w_oj - self.human.cur_wl)
+				human_task_cnt = sum(self.x_i) - self.robot.task_assigned
+				w_oj = self.human.cur_wl + self.human.delWorkload(human_task_cnt + 1)
+				a_ij = self.human.task_perf*(self.W_ol - abs(self.W_nl - w_oj))
+				p_ij = (100.0-self.human.task_perf)*abs(w_oj - self.human.cur_wl)
 				b_ij = a_ij - p_ij
 				b_i.append(b_ij)
 
@@ -140,7 +145,7 @@ class Team(object):
 
 		# TODO: update the robot.task_assigned value in h_ij
 		cur_team_task = list(task_mat[self.id])
-		if self.human.cur_wl > self.W_nl and sum(cur_team_task) > 0: # Checking to assign task to robot agent
+		if self.human.cur_wl > self.W_ol and sum(cur_team_task) > 0: # Checking to assign task to robot agent
 			idx = cur_team_task.index(1) # find the idx of the task
 			pos = self.id*n_tasks + idx # Find the task position in z_i
 			b_i[pos] = 1.1*b_i[pos] # Alter the corresponding bidding value by 10%
