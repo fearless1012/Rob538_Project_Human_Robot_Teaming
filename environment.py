@@ -7,6 +7,8 @@ import random
 from Team import Team
 import time
 
+np.set_printoptions(precision = 3, linewidth=1000)
+
 class World(object):
     def __init__(self, title, n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100, W_ul=20.0, W_ol=100.0):
         self.title = title
@@ -94,9 +96,11 @@ class World(object):
             #Get y from neighbors
             row = team.id
             neighbors_y = list()
-            for neighbor in comm_mat[row]:
+            neighbors = list()
+            for i, neighbor in enumerate(comm_mat[row]):
                 if neighbor == 1:
-                    neighbors_y.append(self.Teams[neighbor].y_i)
+                    neighbors_y.append(self.Teams[i].y_i)
+                    neighbors.append(i)
             
             #Find max task bid
             for i, x in enumerate(team.x_i):
@@ -108,10 +112,9 @@ class World(object):
                             max_bid = neighbor_bid
                             team.y_i[i] = max_bid
                             team.x_i[i] = 0
-
     def reached_consensus(self):
         for team in self.Teams:
-            if team.y_previous.all() != team.y_i.all():
+            if not np.array_equal(team.y_previous, team.y_i):
                 return False
         return True
             
@@ -127,12 +130,12 @@ class World(object):
                 # Phase 0 Set up problem
                 self.generate_B(task_mat)
                 for team in self.Teams:
-                    team.y_previous = team.y_i
+                    team.y_previous = copy.deepcopy(team.y_i)
                 
                 self.auction_phase() # Phase 1 Auction
                 self.consensus_phase(comm_mat)  # Phase 2 Consensus
 
-                if counter > 100:  # Phase 3: Check Consensus
+                if counter >= 100:  # Phase 3: Check Consensus
                     consensus = True
                 else:
                     consensus = self.reached_consensus()
@@ -325,8 +328,8 @@ def main():
 
 #     # Comparison 1: Environment
 #     # Scenario 1a: Static with 20 teams & 4 tasks and Mixed Capabilities
-    world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-    world_obj_1a.runSimulation()
+    # world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    # world_obj_1a.runSimulation()
 
 #     # Comparison 1: Environment
 #     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
@@ -337,13 +340,13 @@ def main():
 
 #     # Comparison 2: Team Scalability
 #     # Scenario 2a: Static with 10 teams and Mixed Capabilities
-#     world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-#     world_obj_2a.runSimulation()
+    world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_2a.runSimulation()
 
 #     # Comparison 2: Team Scalability
 #     # Scenario 2b: Static with 50 teams and Mixed Capabilities
-#     world_obj_2b = World(title='50 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-#     world_obj_2b.runSimulation()
+    world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_2b.runSimulation()
 
 
 # # ###################################################################################################
