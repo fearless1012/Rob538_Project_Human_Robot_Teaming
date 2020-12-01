@@ -179,7 +179,7 @@ class World(object):
                         human_task_cnt = sum(team.x_i) - team.robot.task_assigned
                         w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
                         a_ij = team.human.task_perf*(team.W_ol - abs(team.W_nl - w_oj))
-                        p_ij = (100.-team.human.task_perf)*abs(w_oj - team.human.cur_wl)
+                        p_ij = (1.-team.human.task_perf)*abs(w_oj - team.human.cur_wl)
                         b_ij = a_ij - p_ij
                         b_i.append(b_ij)
                     elif team.z_i[j] == 0:
@@ -265,10 +265,10 @@ class World(object):
             wl_t.append(wl)
 
         total_tasks = np.sum(task_mat)
-        # perf_mean  = system_perf/(total_tasks*sum(h_t))
-
-        perf_mean = (tasks_assigned/total_tasks)*100.0
-        print(task_assigned, total_tasks, perf_mean)
+        perf_mean  = system_perf/(total_tasks) * 100.0
+        
+        # print(system_perf, total_tasks, total_tasks*sum(h_t))
+        # print(tasks_assigned, total_tasks, perf_mean)
         
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
@@ -339,7 +339,7 @@ class World(object):
         
         plt.legend(loc="upper right", fontsize=30)
         plt.xlim(-0.03*self.n_episodes, 1.03*self.n_episodes)
-        plt.ylim(0, 100)
+        plt.ylim(0, 110)
         plt.grid()
         plt.show()
 
