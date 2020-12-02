@@ -334,7 +334,7 @@ class World(object):
         plt.plot(x, ran_wl, '-', label='Random', color='blue')
         plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
 
-        plt.legend(loc="upper right", fontsize=30)
+        plt.legend(loc="upper right", fontsize=30, prop={'size': 6})
         plt.xlim(-0.03*self.n_episodes, 1.10*self.n_episodes)
         plt.ylim(0, 100+50)
         plt.grid()
@@ -368,20 +368,20 @@ def main():
 
     # Comparison 1: Environment
     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
-    # world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
-    # world_obj_1b.runSimulation()
+    world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
+    world_obj_1b.runSimulation()
 
 # # ####################################################################################################
 
 #     # Comparison 2: Team Scalability
 #     # Scenario 2a: Static with 10 teams and Mixed Capabilities
-    # world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-    # world_obj_2a.runSimulation()
+    world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_2a.runSimulation()
 
 #     # Comparison 2: Team Scalability
 #     # Scenario 2b: Static with 50 teams and Mixed Capabilities
-    # world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-    # world_obj_2b.runSimulation()
+    world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_2b.runSimulation()
 
 
 # # ###################################################################################################
@@ -389,14 +389,15 @@ def main():
 #     # Comparison 3: Team Capabilities
 #     # Scenario 3a: Static with 20 teams and all are bad teams
 #     n_episodes = 100
-#     world_obj_3a = World(title='Only Bad Teams:', n_teams=20, n_tasks=4, static=True, capability='bad', n_episodes=100)
-#     world_obj_3a.runSimulation()
+    world_obj_3a = World(title='Only Bad Teams:', n_teams=20, n_tasks=4, static=True, capability='bad', n_episodes=100)
+    world_obj_3a.runSimulation()
 
 
 #     # Comparison 3: Team Capabilities
 #     # Scenario 3b: Static with 20 teams and all good agents   
-#     world_obj_3b = World(title='Only Good Teams:', n_teams=20, n_tasks=4, static=True, capability='good', n_episodes=100)
-#     world_obj_3b.runSimulation()
+    world_obj_3b = World(title='Only Good Teams:', n_teams=20, n_tasks=4, static=True, capability='good', n_episodes=100)
+    world_obj_3b.runSimulation()
+    print("here")
 
 if __name__ == '__main__':
     main()
