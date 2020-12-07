@@ -7,12 +7,14 @@ import random
 from Team import Team
 import time
 
-np.set_printoptions(precision = 3, linewidth=1000)
+np.set_printoptions(precision=3, linewidth=1000)
+
 
 class World(object):
-    def __init__(self, title, n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100, W_ul=50.0, W_ol=100.0):
+    def __init__(self, title, n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100, W_ul=50.0,
+                 W_ol=100.0):
         self.title = title
-        self.n_teams = n_teams  
+        self.n_teams = n_teams
         self.n_tasks = n_tasks
         self.static = static
         self.n_episodes = n_episodes
@@ -33,9 +35,6 @@ class World(object):
         self.random_wl_mean = []
         self.random_wl_std = []
         self.random_perf = []
-
-        self.team_wl_random = np.zeros(self.n_episodes,self.n_teams)
-        self.team_perf_random = np.zeros(self.n_episodes,self.n_teams)
 
     def generate_teams(self, n_teams, n_tasks, capability, W_ul, W_ol):
         Teams = []
@@ -82,7 +81,7 @@ class World(object):
     def updateWorkload(self):
         for i in range(self.n_teams):
             self.Teams[i].updateWorkload()
-            
+
     def clearParams(self, reset_workload=False):
         for i in range(self.n_teams):
             self.Teams[i].clearParams(reset_workload)
@@ -102,7 +101,7 @@ class World(object):
 
     def consensus_phase(self, comm_mat):
         for team in self.Teams:
-            #Get y from neighbors
+            # Get y from neighbors
             row = team.id
             neighbors_y = list()
             neighbors = list()
@@ -110,8 +109,8 @@ class World(object):
                 if neighbor == 1:
                     neighbors_y.append(self.Teams[i].y_i)
                     neighbors.append(i)
-            
-            #Find max task bid
+
+            # Find max task bid
             for i, y in enumerate(team.y_i):
                 max_bid = team.y_i[i]
                 for y_k in neighbors_y:
@@ -126,7 +125,7 @@ class World(object):
             if not np.array_equal(team.y_previous, team.y_i):
                 return False
         return True
-            
+
     def runConsensusSimulation(self):
         print("Running consensus")
         for i in range(self.n_episodes):
@@ -136,13 +135,13 @@ class World(object):
             self.generate_Z(comm_mat, task_mat)
             consensus = False
             counter = 0
-            while consensus != True: # Subject to change; Update the termination condition for consensus termination
+            while consensus != True:  # Subject to change; Update the termination condition for consensus termination
                 # Phase 0 Set up problem
                 self.generate_B(task_mat)
                 for team in self.Teams:
                     team.x_previous = copy.deepcopy(team.x_i)
 
-                self.auction_phase() # Phase 1 Auction
+                self.auction_phase()  # Phase 1 Auction
                 self.consensus_phase(comm_mat)  # Phase 2 Consensus
 
                 if counter >= 100:  # Phase 3: Check Consensus
@@ -151,7 +150,7 @@ class World(object):
                     consensus = self.reached_consensus()
                 counter += 1
 
-            self.updateWorkload() #  updateWorkload
+            self.updateWorkload()  # updateWorkload
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
             self.consensus_wl_mean.append(wl_mean)
             self.consensus_wl_std.append(wl_std)
@@ -165,14 +164,14 @@ class World(object):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
 
-            #NoCollab Task Allocation Algorithm
+            # NoCollab Task Allocation Algorithm
             self.generate_Z(comm_mat, task_mat)
             for team in self.Teams:
                 G = comm_mat[team.id]
                 z_i = list()
                 b_i = list()
 
-                #No collaboration - generate Z
+                # No collaboration - generate Z
                 for j in range(len(G)):
                     if j == team.id:
                         z_i += list(task_mat[j])
@@ -184,13 +183,13 @@ class World(object):
                 else:
                     print("Invalid shape Z")
 
-                #No collaboration - generate B
+                # No collaboration - generate B
                 for j in range(len(team.z_i)):
                     if team.z_i[j] == 1:
                         human_task_cnt = sum(team.x_i) - team.robot.task_assigned
                         w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
-                        a_ij = team.human.task_perf*(team.W_ol - abs(team.W_nl - w_oj))
-                        p_ij = (1.-team.human.task_perf)*abs(w_oj - team.human.cur_wl)
+                        a_ij = team.human.task_perf * (team.W_ol - abs(team.W_nl - w_oj))
+                        p_ij = (1. - team.human.task_perf) * abs(w_oj - team.human.cur_wl)
                         b_ij = a_ij - p_ij
                         b_i.append(b_ij)
                     elif team.z_i[j] == 0:
@@ -200,10 +199,10 @@ class World(object):
                         print("Invalid z value in updateB")
 
                 cur_team_task = list(task_mat[team.id])
-                if team.human.cur_wl > team.W_ol and sum(cur_team_task) > 0: # Checking to assign task to robot agent
-                    idx = cur_team_task.index(1) # find the idx of the task
-                    pos = team.id*self.n_tasks + idx # Find the task position in z_i
-                    b_i[pos] = 1.1*b_i[pos] # Alter the corresponding bidding value by 10%
+                if team.human.cur_wl > team.W_ol and sum(cur_team_task) > 0:  # Checking to assign task to robot agent
+                    idx = cur_team_task.index(1)  # find the idx of the task
+                    pos = team.id * self.n_tasks + idx  # Find the task position in z_i
+                    b_i[pos] = 1.1 * b_i[pos]  # Alter the corresponding bidding value by 10%
                     team.robot.watch_pos = pos
                     team.robot.task_idx = idx
                 # Sanity Check
@@ -225,14 +224,14 @@ class World(object):
             self.noCollab_perf.append(perf_mean)
             self.clearParams()
         self.clearParams(reset_workload=True)
-        
+
     def runRandomSimulation(self):
         print("Running random")
         for i in range(self.n_episodes):
             task_mat = self.task_mat_set[i]
             comm_mat = self.comm_mat_set[i]
 
-            #random allocation
+            # random allocation
             self.generate_Z(comm_mat, task_mat)
 
             unallocated_tasks = 0
@@ -254,12 +253,6 @@ class World(object):
                             unallocated_tasks += sum(team_update.z_i)
 
             self.updateWorkload()
-
-            wl_t, h_t = self.getMetricsforBar()
-            self.team_wl_random.append(wl_t)
-            self.team_perf_random.append(h_t)
-            print(self.team_wl_random)
-
             wl_mean, wl_std, perf_mean = self.getMetrics(task_mat)
             self.random_wl_mean.append(wl_mean)
             self.random_wl_std.append(wl_std)
@@ -268,8 +261,8 @@ class World(object):
         self.clearParams(reset_workload=True)
 
     def runSimulation(self):
-        #self.runConsensusSimulation()
-        #self.runNoCollabSimulation()
+        self.runConsensusSimulation()
+        self.runNoCollabSimulation()
         self.runRandomSimulation()
         self.plot(title=self.title)
 
@@ -286,29 +279,19 @@ class World(object):
             wl_t.append(wl)
 
         total_tasks = np.sum(task_mat)
-        perf_mean  = system_perf/(total_tasks) * 100.0
-        
+        perf_mean = system_perf / (total_tasks) * 100.0
+
         # print("Perf: {}, Total task: {}, Tasks Weight: {}".format(system_perf, total_tasks, total_tasks*sum(h_t)))
         # print("Assigned {} Total {} Avg Perf {}".format(tasks_assigned, total_tasks, perf_mean))
         wl_mean = np.mean(wl_t)
         wl_std = np.std(wl_t)
         return wl_mean, wl_std, perf_mean
 
-    def getMetricsforBar(self):
-        wl_t = []
-        h_t = []
-        for i in range(self.n_teams):
-            wl = self.Teams[i].human.cur_wl
-            h_t.append(self.Teams[i].human.task_perf)
-            wl_t.append(wl)
-
-        return wl_t, h_t
-
     def moving_average(self, reward_list, n=10):
         ma_reward = []
         N = len(reward_list)
         for i in range(N):
-            end = i+n
+            end = i + n
             if end < N:
                 cum = reward_list[i:end]
                 avg = np.sum(cum) / (len(cum))
@@ -319,116 +302,106 @@ class World(object):
 
     def plot(self, title=''):
         x = range(self.n_episodes)
-        # con_wl = self.consensus_wl_mean
-        # con_wl_errm = np.subtract(self.consensus_wl_mean, self.consensus_wl_std)
-        # con_wl_errp = np.add(self.consensus_wl_mean, self.consensus_wl_std)
-        # con_perf = self.consensus_perf
+        con_wl = self.consensus_wl_mean
+        con_wl_errm = np.subtract(self.consensus_wl_mean, self.consensus_wl_std)
+        con_wl_errp = np.add(self.consensus_wl_mean, self.consensus_wl_std)
+        con_perf = self.consensus_perf
 
         ncb_wl = self.noCollab_wl_mean
         ncb_wl_errm = np.subtract(self.noCollab_wl_mean, self.noCollab_wl_std)
-        ncb_wl_errp = np.add(self.noCollab_wl_mean, self.noCollab_wl_std) 
+        ncb_wl_errp = np.add(self.noCollab_wl_mean, self.noCollab_wl_std)
         ncb_perf = self.noCollab_perf
 
         ran_wl = self.random_wl_mean
         ran_wl_errm = np.subtract(self.random_wl_mean, self.random_wl_std)
-        ran_wl_errp = np.add(self.random_wl_mean, self.random_wl_std) 
+        ran_wl_errp = np.add(self.random_wl_mean, self.random_wl_std)
         ran_perf = self.random_perf
 
-        bar_ran_wl = np.mean(ran_wl)
-        bar_ncb_wl = np.mean(ncb_wl)
-        bar_ran_perf = np.mean(ran_perf)
-        bar_ncb_per = np.mean(ncb_perf)
+        plt.clf()
+        plt.xlabel('Time Steps', fontsize=15)
+        plt.ylabel('Workload Level', fontsize=15)
+        plt.xticks(fontsize=15)
+        plt.yticks(fontsize=15)
+        plt.title(title + " Workload Variation", fontsize=15)
 
-        x_axis = self.n_teams
+        plt.plot(x, con_wl, '-', label='Consensus', color='red')
+        plt.fill_between(x, con_wl_errm, con_wl_errp, color='red', alpha=0.2)
 
+        plt.plot(x, ncb_wl, '-', label='No Collaboration', color='green')
+        plt.fill_between(x, ncb_wl_errm, ncb_wl_errp, color='green', alpha=0.2)
 
+        plt.plot(x, ran_wl, '-', label='Random', color='blue')
+        plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
 
+        plt.legend(loc="upper right", fontsize=10)
+        plt.xlim(-0.03 * self.n_episodes, 1.10 * self.n_episodes)
+        plt.ylim(0, 100 + 50)
+        plt.grid()
+        plt.show()
 
+        plt.clf()
+        plt.xlabel('Time Steps', fontsize=15)
+        plt.ylabel('Performance Level', fontsize=15)
+        plt.xticks(fontsize=15)
+        plt.yticks(fontsize=15)
+        plt.title(title + " Performance", fontsize=15)
 
-        # plt.clf()
-        # plt.xlabel('Time Steps', fontsize=15)
-        # plt.ylabel('Workload Level', fontsize=15)
-        # plt.xticks(fontsize=15)
-        # plt.yticks(fontsize=15)
-        # plt.title(title+" Workload Variation", fontsize=15)
+        plt.plot(x, con_perf, '-', label='Consensus', color='red')
+        plt.plot(x, ncb_perf, '-', label='No Collaboration', color='green')
+        plt.plot(x, ran_perf, '-', label='Random', color='blue')
 
-        # plt.plot(x, con_wl, '-', label='Consensus', color='red')
-        # plt.fill_between(x, con_wl_errm, con_wl_errp, color='red', alpha=0.2)
-        
-        # plt.plot(x, ncb_wl, '-', label='No Collaboration', color='green')
-        # plt.fill_between(x, ncb_wl_errm, ncb_wl_errp, color='green', alpha=0.2)
+        plt.legend(loc="upper right", fontsize=10)
+        plt.xlim(-0.03 * self.n_episodes, 1.03 * self.n_episodes)
+        plt.ylim(0, 110)
+        plt.grid()
+        plt.show()
 
-        # plt.plot(x, ran_wl, '-', label='Random', color='blue')
-        # plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
-
-        # plt.legend(loc="upper right", fontsize=10)
-        # plt.xlim(-0.03*self.n_episodes, 1.10*self.n_episodes)
-        # plt.ylim(0, 100+50)
-        # plt.grid()
-        # plt.show()
-
-        # plt.clf()
-        # plt.xlabel('Time Steps', fontsize=15)
-        # plt.ylabel('Performance Level', fontsize=15)
-        # plt.xticks(fontsize=15)
-        # plt.yticks(fontsize=15)
-        # plt.title(title+" Performance", fontsize=15)
-        #
-        # # plt.plot(x, con_perf, '-', label='Consensus', color='red')
-        # plt.plot(x, ncb_perf, '-', label='No Collaboration', color='green')
-        # plt.plot(x, ran_perf, '-', label='Random', color='blue')
-        #
-        # plt.legend(loc="upper right", fontsize=10)
-        # plt.xlim(-0.03*self.n_episodes, 1.03*self.n_episodes)
-        # plt.ylim(0, 110)
-        # plt.grid()
-        # plt.show()
 
 ##################################################################################################
 
 def main():
-
-#     # Comparison 1: Environment
-#     # Scenario 1a: Static with 20 teams & 4 tasks and Mixed Capabilities
-    world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    #     # Comparison 1: Environment
+    #     # Scenario 1a: Static with 20 teams & 4 tasks and Mixed Capabilities
+    world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed',
+                         n_episodes=100)
     world_obj_1a.runSimulation()
-#
-#     # Comparison 1: Environment
-#     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
-#     world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
-#     world_obj_1b.runSimulation()
-#     print("here1")
+    #
+    #     # Comparison 1: Environment
+    #     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
+    world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed',
+                         n_episodes=100)
+    world_obj_1b.runSimulation()
+    print("here1")
 
-# # ####################################################################################################
+    # # ####################################################################################################
 
-#     # Comparison 2: Team Scalability
-#     # Scenario 2a: Static with 10 teams and Mixed Capabilities
-#     world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-#     world_obj_2a.runSimulation()
+    #     # Comparison 2: Team Scalability
+    #     # Scenario 2a: Static with 10 teams and Mixed Capabilities
+    world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_2a.runSimulation()
 
-#     # Comparison 2: Team Scalability
-#     # Scenario 2b: Static with 50 teams and Mixed Capabilities
-#     world_obj_2b = World(title='50 Teams:', n_teams=50, n_tasks=4, static=True, capability='mixed', n_episodes=100)
-#     world_obj_2b.runSimulation()
-#     print("here2")
+    #     # Comparison 2: Team Scalability
+    #     # Scenario 2b: Static with 50 teams and Mixed Capabilities
+    world_obj_2b = World(title='50 Teams:', n_teams=50, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+    world_obj_2b.runSimulation()
+    print("here2")
 
-# # ###################################################################################################
+    # # ###################################################################################################
 
-#     # Comparison 3: Team Capabilities
-#     # Scenario 3a: Static with 20 teams and all are bad teams
-#     n_episodes = 100
-#     world_obj_3a = World(title='Only Bad Teams:', n_teams=20, n_tasks=4, static=True, capability='bad', n_episodes=100)
-#     world_obj_3a.runSimulation()
-#
-#
-# #     # Comparison 3: Team Capabilities
-# #     # Scenario 3b: Static with 20 teams and all good agents
-    world_obj_3b = World(title='Only Good Teams:', n_teams=20, n_tasks=4, static=True, capability='good', n_episodes=100)
+    #     # Comparison 3: Team Capabilities
+    #     # Scenario 3a: Static with 20 teams and all are bad teams
+    #     n_episodes = 100
+    world_obj_3a = World(title='Only Bad Teams:', n_teams=20, n_tasks=4, static=True, capability='bad', n_episodes=100)
+    world_obj_3a.runSimulation()
+    #
+    #
+    # #     # Comparison 3: Team Capabilities
+    # #     # Scenario 3b: Static with 20 teams and all good agents
+    world_obj_3b = World(title='Only Good Teams:', n_teams=20, n_tasks=4, static=True, capability='good',
+                         n_episodes=100)
     world_obj_3b.runSimulation()
     print("here3")
 
+
 if __name__ == '__main__':
     main()
-
-
-
