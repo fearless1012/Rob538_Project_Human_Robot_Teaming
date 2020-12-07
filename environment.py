@@ -140,8 +140,13 @@ class World(object):
                 self.generate_B(task_mat)
                 for team in self.Teams:
                     team.x_previous = copy.deepcopy(team.x_i)
+<<<<<<< HEAD
 
                 self.auction_phase()  # Phase 1 Auction
+=======
+                
+                self.auction_phase() # Phase 1 Auction
+>>>>>>> parent of a51be44... Plots formatted
                 self.consensus_phase(comm_mat)  # Phase 2 Consensus
 
                 if counter >= 100:  # Phase 3: Check Consensus
@@ -240,7 +245,10 @@ class World(object):
 
             while unallocated_tasks > 0:
                 for team in self.Teams:
+                    human_task_cnt = sum(team.x_i)
+                    w_oj = team.human.cur_wl + team.human.delWorkload(human_task_cnt + 1)
                     if sum(team.z_i) > 0:
+                        row = team.id
                         tasks_avail = []
                         for i in range(len(team.z_i)):
                             if team.z_i[i] == 1:
@@ -304,7 +312,7 @@ class World(object):
         x = range(self.n_episodes)
         con_wl = self.consensus_wl_mean
         con_wl_errm = np.subtract(self.consensus_wl_mean, self.consensus_wl_std)
-        con_wl_errp = np.add(self.consensus_wl_mean, self.consensus_wl_std)
+        con_wl_errp = np.add(self.consensus_wl_mean, self.consensus_wl_std) 
         con_perf = self.consensus_perf
 
         ncb_wl = self.noCollab_wl_mean
@@ -318,11 +326,19 @@ class World(object):
         ran_perf = self.random_perf
 
         plt.clf()
+<<<<<<< HEAD
         plt.xlabel('Time Steps', fontsize=15)
         plt.ylabel('Workload Level', fontsize=15)
         plt.xticks(fontsize=15)
         plt.yticks(fontsize=15)
         plt.title(title + " Workload Variation", fontsize=15)
+=======
+        plt.xlabel('Time Steps', fontsize=35)
+        plt.ylabel('Workload Level', fontsize=35)
+        plt.xticks(fontsize=25)
+        plt.yticks(fontsize=25)
+        plt.title(title+" Workload Variation", fontsize=40)
+>>>>>>> parent of a51be44... Plots formatted
 
         plt.plot(x, con_wl, '-', label='Consensus', color='red')
         plt.fill_between(x, con_wl_errm, con_wl_errp, color='red', alpha=0.2)
@@ -333,25 +349,45 @@ class World(object):
         plt.plot(x, ran_wl, '-', label='Random', color='blue')
         plt.fill_between(x, ran_wl_errm, ran_wl_errp, color='blue', alpha=0.2)
 
+<<<<<<< HEAD
         plt.legend(loc="upper right", fontsize=10)
         plt.xlim(-0.03 * self.n_episodes, 1.10 * self.n_episodes)
         plt.ylim(0, 100 + 50)
+=======
+        plt.legend(loc="upper right", fontsize=30, prop={'size': 6})
+        plt.xlim(-0.03*self.n_episodes, 1.10*self.n_episodes)
+        plt.ylim(0, 100+50)
+>>>>>>> parent of a51be44... Plots formatted
         plt.grid()
         plt.show()
 
         plt.clf()
+<<<<<<< HEAD
         plt.xlabel('Time Steps', fontsize=15)
         plt.ylabel('Performance Level', fontsize=15)
         plt.xticks(fontsize=15)
         plt.yticks(fontsize=15)
         plt.title(title + " Performance", fontsize=15)
+=======
+        plt.xlabel('Time Steps', fontsize=35)
+        plt.ylabel('Performance Level', fontsize=35)
+        plt.xticks(fontsize=25)
+        plt.yticks(fontsize=25)
+        plt.title(title+" Performance", fontsize=40)
+>>>>>>> parent of a51be44... Plots formatted
 
         plt.plot(x, con_perf, '-', label='Consensus', color='red')
         plt.plot(x, ncb_perf, '-', label='No Collaboration', color='green')
         plt.plot(x, ran_perf, '-', label='Random', color='blue')
+<<<<<<< HEAD
 
         plt.legend(loc="upper right", fontsize=10)
         plt.xlim(-0.03 * self.n_episodes, 1.03 * self.n_episodes)
+=======
+        
+        plt.legend(loc="upper right", fontsize=30)
+        plt.xlim(-0.03*self.n_episodes, 1.03*self.n_episodes)
+>>>>>>> parent of a51be44... Plots formatted
         plt.ylim(0, 110)
         plt.grid()
         plt.show()
@@ -365,13 +401,19 @@ def main():
     world_obj_1a = World(title='Static Environment:', n_teams=20, n_tasks=4, static=True, capability='mixed',
                          n_episodes=100)
     world_obj_1a.runSimulation()
+<<<<<<< HEAD
     #
     #     # Comparison 1: Environment
     #     # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
     world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed',
                          n_episodes=100)
+=======
+
+    # Comparison 1: Environment
+    # Scenario 1b: Dynamic with 20 teams and Mixed Capabilities
+    world_obj_1b = World(title='Dynamic Environment:', n_teams=20, n_tasks=4, static=False, capability='mixed', n_episodes=100)
+>>>>>>> parent of a51be44... Plots formatted
     world_obj_1b.runSimulation()
-    print("here1")
 
     # # ####################################################################################################
 
@@ -380,11 +422,17 @@ def main():
     world_obj_2a = World(title='10 Teams:', n_teams=10, n_tasks=4, static=True, capability='mixed', n_episodes=100)
     world_obj_2a.runSimulation()
 
+<<<<<<< HEAD
     #     # Comparison 2: Team Scalability
     #     # Scenario 2b: Static with 50 teams and Mixed Capabilities
     world_obj_2b = World(title='50 Teams:', n_teams=50, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+=======
+#     # Comparison 2: Team Scalability
+#     # Scenario 2b: Static with 50 teams and Mixed Capabilities
+    world_obj_2b = World(title='100 Teams:', n_teams=100, n_tasks=4, static=True, capability='mixed', n_episodes=100)
+>>>>>>> parent of a51be44... Plots formatted
     world_obj_2b.runSimulation()
-    print("here2")
+
 
     # # ###################################################################################################
 
@@ -393,14 +441,22 @@ def main():
     #     n_episodes = 100
     world_obj_3a = World(title='Only Bad Teams:', n_teams=20, n_tasks=4, static=True, capability='bad', n_episodes=100)
     world_obj_3a.runSimulation()
+<<<<<<< HEAD
     #
     #
     # #     # Comparison 3: Team Capabilities
     # #     # Scenario 3b: Static with 20 teams and all good agents
     world_obj_3b = World(title='Only Good Teams:', n_teams=20, n_tasks=4, static=True, capability='good',
                          n_episodes=100)
+=======
+
+
+#     # Comparison 3: Team Capabilities
+#     # Scenario 3b: Static with 20 teams and all good agents   
+    world_obj_3b = World(title='Only Good Teams:', n_teams=20, n_tasks=4, static=True, capability='good', n_episodes=100)
+>>>>>>> parent of a51be44... Plots formatted
     world_obj_3b.runSimulation()
-    print("here3")
+    print("here")
 
 
 if __name__ == '__main__':
